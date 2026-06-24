@@ -14,7 +14,7 @@ export default function DateFilter({ dates, onDateChange }: DateFilterProps) {
   };
 
   return (
-    <div className="flex gap-4 ml-5 mb-6">
+    <div className="flex gap-4 ml-5">
       {dates.map((date) => (
         <button
           key={date}

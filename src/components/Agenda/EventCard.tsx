@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { MapPin, Star } from "lucide-react";
 
-type EventCardProps = {
-  time: string;
+export type EventCardProps = {
+  id: string;
+  time: Date;
   title: string;
   location: string;
-  isFavorite?: boolean;
-  onToggleFavorite?: () => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 };
 
 export default function EventCard({
@@ -19,7 +20,7 @@ export default function EventCard({
   return (
     <div className="flex items-center gap-4 bg-[#1e1e1e] rounded-xl px-4 py-3 mx-4 mb-4">
       <span className="text-white text-sm font-medium w-12 shrink-0">
-        {time}
+        {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
       </span>
       <div className="flex-1 min-w-0 text-left">
         <p className="text-white text-sm font-medium truncate">{title}</p>
