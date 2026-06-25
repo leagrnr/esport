@@ -5,6 +5,7 @@ export type EventCardProps = {
   time: Date;
   title: string;
   location: string;
+  game: string;
   isFavorite: boolean;
   onToggleFavorite: () => void;
 };
@@ -13,11 +14,21 @@ export default function EventCard({
   time,
   title,
   location,
+  game,
   isFavorite = false,
   onToggleFavorite,
 }: EventCardProps) {
+  const bgColor =
+    game === "valorant"
+      ? "bg-red-950"
+      : game === "lol"
+        ? "bg-[#55420B]"
+        : "bg-[#1e1e1e]";
+
   return (
-    <div className="flex items-center gap-4 bg-[#1e1e1e] rounded-xl px-4 py-3 mx-4 mb-4">
+    <div
+      className={`flex items-center gap-4 ${bgColor} rounded-xl px-4 py-3 mx-4 mb-4`}
+    >
       <span className="text-white text-sm font-medium w-12 shrink-0">
         {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
       </span>
