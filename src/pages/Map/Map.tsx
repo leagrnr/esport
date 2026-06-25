@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ScanCard from "../../components/Quetes/questScan";
 import QuestProgression from "../../components/Quetes/questProgression";
+import { useLocalStorage } from "@uidotdev/usehooks";
 
 const stands = [
   { id: "A", title: "Logitech G", subtitle: "Tapis de souris + 20pts" },
@@ -11,7 +12,7 @@ const stands = [
 ];
 
 export default function Map() {
-  const [scanned, setScanned] = useState<string[]>([]);
+  const [scanned, setScanned] = useLocalStorage<string[]>("scanned", []);
 
   const handleScan = (standId: string) => {
     if (!scanned.includes(standId)) {

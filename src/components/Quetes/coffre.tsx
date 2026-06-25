@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import chestAnimation from "../../assets/treasure_chest.json";
-import LottieRaw from "lottie-react";
-// @ts-ignore
-const Lottie: typeof LottieRaw = LottieRaw.default;
+import lottie, { AnimationItem } from "lottie-web";
+import { useLocalStorage } from "@uidotdev/usehooks";
 
 const lots = [
   "Manette Gaming",
@@ -14,30 +13,44 @@ const lots = [
 ];
 
 export default function Coffre() {
-  const [lot, setLot] = useState<string | null>(null);
-  const lottieRef = useRef<null | { setSpeed: (speed: number) => void }>(null);
+  const [lot, setLot] = useLocalStorage<string | null>("lot", null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const animRef = useRef<AnimationItem | null>(null);
 
   useEffect(() => {
-    if (lottieRef.current) {
-      lottieRef.current.setSpeed(3);
+    if (!containerRef.current) return;
+
+    const anim = lottie.loadAnimation({
+      container: containerRef.current,
+      animationData: chestAnimation,
+      loop: false,
+      autoplay: true,
+    });
+
+    animRef.current = anim;
+
+    anim.setSpeed(3);
+
+    const handleComplete = () => {
+      const random = lots[Math.floor(Math.random() * lots.length)];
+      setLot(random);
+    };
+
+    if (lot === null) {
+      anim.addEventListener("complete", handleComplete);
     }
-  }, [lottieRef]);
+
+    return () => {
+      anim.removeEventListener("complete", handleComplete);
+      anim.destroy();
+    };
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center py-12 gap-6">
       <p className="text-white text-lg font-medium">Quête complétée !</p>
 
-      <div className="cursor-pointer w-48 h-48">
-        <Lottie
-          animationData={chestAnimation}
-          loop={false}
-          lottieRef={lottieRef}
-          onComplete={() => {
-            const random = lots[Math.floor(Math.random() * lots.length)];
-            setLot(random);
-          }}
-        />
-      </div>
+      <div className="cursor-pointer w-48 h-48" ref={containerRef} />
 
       <AnimatePresence>
         {lot && (
