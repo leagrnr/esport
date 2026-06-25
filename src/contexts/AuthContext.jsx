@@ -33,7 +33,7 @@ export function AuthProvider({ children }) {
     setProfile(data)
   }
 
-  async function signUp(email, password, pseudo, role) {
+  async function signUp(email, password, pseudo, role, camp = null) {
     const safeRole = role === 'admin' ? 'spectateur' : role
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -51,7 +51,7 @@ export function AuthProvider({ children }) {
     if (existing) {
       await supabase.from('utilisateur').update({ pseudo }).eq('id', existing.id)
     } else {
-      await supabase.from('utilisateur').insert({ email, pseudo, role: safeRole, points_classement: 0 })
+      await supabase.from('utilisateur').insert({ email, pseudo, role: safeRole, camp, points_classement: 0 })
     }
 
     return data

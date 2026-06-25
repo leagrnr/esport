@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Trophy, Eye, ShieldCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { supabase } from '../../lib/supabase'
 import './AuthModal.css'
 
 const ROLES = [
@@ -9,15 +10,36 @@ const ROLES = [
   { value: 'spectateur', label: 'Spectateur', icon: Eye, desc: 'Je suis le tournoi' },
 ]
 
+const CAMPS = [
+  { value: 'lol', label: 'League of Legends', color: '#c8aa6e', bg: 'rgba(200,170,110,0.1)', border: 'rgba(200,170,110,0.4)' },
+  { value: 'valo', label: 'Valorant', color: '#ff4655', bg: 'rgba(255,70,85,0.08)', border: 'rgba(255,70,85,0.4)' },
+]
+
 export default function AuthModal({ isOpen, onClose }) {
   const { signIn, signUp, signOut, user, profile } = useAuth()
   const navigate = useNavigate()
   const [tab, setTab] = useState('connexion')
   const [role, setRole] = useState('spectateur')
+  const [camp, setCamp] = useState(null)
+  const [campStats, setCampStats] = useState({ lol: 0, valo: 0 })
   const [form, setForm] = useState({ email: '', password: '', pseudo: '' })
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (tab === 'inscription' && role === 'spectateur') {
+      fetchCampStats()
+    }
+  }, [tab, role])
+
+  async function fetchCampStats() {
+    const [lolRes, valoRes] = await Promise.all([
+      supabase.from('utilisateur').select('id', { count: 'exact', head: true }).eq('camp', 'lol'),
+      supabase.from('utilisateur').select('id', { count: 'exact', head: true }).eq('camp', 'valo'),
+    ])
+    setCampStats({ lol: lolRes.count ?? 0, valo: valoRes.count ?? 0 })
+  }
 
   if (!isOpen) return null
 
@@ -37,9 +59,11 @@ export default function AuthModal({ isOpen, onClose }) {
         onClose()
       } else {
         if (!form.pseudo.trim()) { setError('Le pseudo est requis'); setLoading(false); return }
-        await signUp(form.email, form.password, form.pseudo.trim(), role)
+        if (role === 'spectateur' && !camp) { setError('Choisis ton camp !'); setLoading(false); return }
+        await signUp(form.email, form.password, form.pseudo.trim(), role, role === 'spectateur' ? camp : null)
         setMessage('Compte créé ! Vérifie ton email pour confirmer.')
         setForm({ email: '', password: '', pseudo: '' })
+        setCamp(null)
       }
     } catch (err) {
       setError(err.message || 'Une erreur est survenue')
@@ -51,6 +75,12 @@ export default function AuthModal({ isOpen, onClose }) {
   async function handleSignOut() {
     await signOut()
     onClose()
+  }
+
+  const total = campStats.lol + campStats.valo
+  function pct(n) {
+    if (total === 0) return 50
+    return Math.round((n / total) * 100)
   }
 
   return (
@@ -67,6 +97,11 @@ export default function AuthModal({ isOpen, onClose }) {
             {profile?.role && (
               <span className={`auth-role-badge auth-role-badge--${profile.role}`}>
                 {profile.role}
+              </span>
+            )}
+            {profile?.camp && (
+              <span className={`auth-camp-badge auth-camp-badge--${profile.camp}`}>
+                {profile.camp === 'lol' ? 'League of Legends' : 'Valorant'}
               </span>
             )}
             {profile?.role === 'admin' && (
@@ -157,6 +192,40 @@ export default function AuthModal({ isOpen, onClose }) {
                       )
                     })}
                   </div>
+                </div>
+              )}
+
+              {tab === 'inscription' && role === 'spectateur' && (
+                <div className="auth-field">
+                  <label>Ton camp</label>
+                  <div className="auth-camps">
+                    {CAMPS.map(c => (
+                      <button
+                        key={c.value}
+                        type="button"
+                        className={`auth-camp-card ${camp === c.value ? 'auth-camp-card--active' : ''}`}
+                        style={camp === c.value ? { borderColor: c.border, background: c.bg } : {}}
+                        onClick={() => setCamp(c.value)}
+                      >
+                        <span className="auth-camp-dot" style={{ background: c.color }} />
+                        <span className="auth-camp-label" style={camp === c.value ? { color: c.color } : {}}>
+                          {c.label}
+                        </span>
+                        <span className="auth-camp-pct" style={camp === c.value ? { color: c.color } : {}}>
+                          {pct(campStats[c.value])}%
+                        </span>
+                        <div className="auth-camp-bar-track">
+                          <div
+                            className="auth-camp-bar-fill"
+                            style={{ width: `${pct(campStats[c.value])}%`, background: c.color }}
+                          />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                  {total > 0 && (
+                    <p className="auth-camp-meta">{total} spectateur{total > 1 ? 's' : ''} ont déjà choisi leur camp</p>
+                  )}
                 </div>
               )}
 
