@@ -4,7 +4,7 @@ import './Navbar.css'
 
 const links = [
   { to: '/', label: 'Home', Icon: Home },
-  { to: '/agenda', label: 'Agenda', Icon: Calendar },
+  { to: '/agenda', label: 'Programme', Icon: Calendar },
   { to: '/map', label: 'Map', Icon: Map },
   { to: '/match', label: 'Match', Icon: Trophy },
 ]
