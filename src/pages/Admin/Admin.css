@@ -1,0 +1,321 @@
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-bottom: 80px;
+}
+
+.admin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Header */
+.admin-header {
+  padding: 16px 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-header-icon {
+  color: #ff4655;
+}
+
+.admin-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+}
+
+.admin-back {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+
+.admin-back:hover { color: #888 }
+
+/* Stats */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.admin-stat-card {
+  background: #111;
+  border: 1px solid #1e1e1e;
+  border-radius: 12px;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.admin-stat-value {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+
+.admin-stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Tabs bar */
+.admin-tabs-bar {
+  display: flex;
+  gap: 6px;
+  padding: 14px 16px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.admin-tabs-bar::-webkit-scrollbar { display: none }
+
+.admin-tab-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #111;
+  border: 1px solid #1e1e1e;
+  border-radius: 20px;
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.admin-tab-btn:hover { color: #888; border-color: #2a2a2a }
+
+.admin-tab-btn--active {
+  background: #ff4655;
+  border-color: #ff4655;
+  color: #fff;
+}
+
+/* Section */
+.admin-section {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-count {
+  font-size: 12px;
+  color: #444;
+  font-weight: 600;
+}
+
+.admin-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ff4655;
+  border: none;
+  border-radius: 20px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.admin-add-btn:active { opacity: 0.8 }
+
+.admin-empty {
+  color: #444;
+  font-size: 14px;
+  text-align: center;
+  padding: 40px 0;
+}
+
+/* List rows */
+.admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #111;
+  border: 1px solid #1e1e1e;
+  border-radius: 12px;
+  padding: 12px 14px;
+  gap: 8px;
+}
+
+.admin-row-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.admin-row-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-row-sub {
+  font-size: 12px;
+  color: #444;
+}
+
+.admin-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Icons */
+.admin-icon-btn {
+  background: #1a1a1a;
+  border: none;
+  color: #666;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.admin-icon-btn:hover { background: #222; color: #999 }
+.admin-icon-btn:active { background: #2a2a2a }
+.admin-icon-btn--danger:hover { color: #ff4655 }
+
+/* Game dot */
+.admin-game-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.admin-game-dot--lol { background: #c8aa6e }
+.admin-game-dot--valo { background: #ff4655 }
+
+/* Status badge */
+.admin-status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.admin-status-badge--a_venir { background: rgba(255,255,255,0.06); color: #666 }
+.admin-status-badge--en_cours { background: rgba(74,222,128,0.12); color: #4ade80 }
+.admin-status-badge--termine { background: rgba(255,70,85,0.1); color: #ff4655 }
+
+/* Team logo */
+.admin-team-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.admin-team-logo--placeholder {
+  background: #1a1a1a;
+}
+
+/* Player avatar */
+.admin-player-avatar {
+  width: 32px;
+  height: 32px;
+  background: #1a1a1a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #555;
+  flex-shrink: 0;
+}
+
+/* Role chip */
+.admin-role-chip {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  text-transform: capitalize;
+}
+
+.admin-role-chip--admin { background: rgba(255,70,85,0.12); color: #ff4655 }
+.admin-role-chip--participant { background: rgba(200,170,110,0.12); color: #c8aa6e }
+.admin-role-chip--spectateur { background: rgba(255,255,255,0.05); color: #555 }
+
+/* Error */
+.admin-error {
+  color: #ff4655;
+  font-size: 13px;
+  margin: 0;
+}
