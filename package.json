@@ -12,6 +12,9 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
     "@uidotdev/usehooks": "^2.4.1",
+    "framer-motion": "^12.42.0",
+    "html5-qrcode": "^2.3.8",
+    "lottie-web": "^5.13.0",
     "lucide-react": "^1.21.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
