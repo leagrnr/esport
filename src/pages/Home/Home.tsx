@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../../lib/SupabaseClient';
 import type { Database } from '../../types/supabase';
 
 type EquipeRow = Database['public']['Tables']['equipe']['Row'];
 
+// Mocks conservés en secours si tes tables distantes sont vides
 const MOCK_EQUIPES_VALO: EquipeRow[] = [
     { id: 1, nom: "SOLARY", logo_url: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80" },
     { id: 2, nom: "KCORP", logo_url: "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80" },
@@ -17,13 +19,58 @@ const MOCK_EQUIPES_LOL: EquipeRow[] = [
 
 export default function Home() {
     const [activeTab, setActiveTab] = useState<'Valorant' | 'League of Legends'>('Valorant');
-    const [teams, setTeams] = useState<EquipeRow[]>(MOCK_EQUIPES_VALO);
-
-    // État pour gérer l'ouverture des volets de règles ('lol' | 'valo' | 'vocab' | null)
+    const [teams, setTeams] = useState<EquipeRow[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
     const [openAccordion, setOpenAccordion] = useState<string | null>(null);
 
     useEffect(() => {
-        setTeams(activeTab === 'Valorant' ? MOCK_EQUIPES_VALO : MOCK_EQUIPES_LOL);
+        async function loadTeams() {
+            setLoading(true);
+            try {
+                // Requête relationnelle : Récupère les équipes associées au jeu sélectionné
+                const { data, error } = await supabase
+                    .from('equipe')
+                    .select(`
+                        id,
+                        nom,
+                        logo_url,
+                        participation!inner (
+                            match!inner (
+                                jeu!inner ( nom )
+                            )
+                        )
+                    `)
+                    .ilike('participation.match.jeu.nom', activeTab);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    // Nettoyage et formatage du résultat pour correspondre à EquipeRow
+                    const formattedTeams: EquipeRow[] = data.map(item => ({
+                        id: item.id,
+                        nom: item.nom,
+                        logo_url: item.logo_url
+                    }));
+
+                    // Retrait des doublons d'équipes si elles jouent plusieurs matchs
+                    const uniqueTeams = formattedTeams.filter((value, index, self) =>
+                        self.findIndex(t => t.id === value.id) === index
+                    );
+
+                    setTeams(uniqueTeams);
+                } else {
+                    // Fallback si la BDD renvoie un tableau vide
+                    setTeams(activeTab === 'Valorant' ? MOCK_EQUIPES_VALO : MOCK_EQUIPES_LOL);
+                }
+            } catch (err) {
+                console.error("Erreur de récupération Supabase, bascule sur les mocks :", err);
+                setTeams(activeTab === 'Valorant' ? MOCK_EQUIPES_VALO : MOCK_EQUIPES_LOL);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadTeams();
     }, [activeTab]);
 
     const toggleAccordion = (id: string) => {
@@ -73,9 +120,15 @@ export default function Home() {
                         </button>
                     </div>
 
-                    {/* Zone du carrousel */}
+                    {/* Zone du carrousel sécurisée avec un loader */}
                     <div className="w-full block overflow-hidden pt-2 pb-5">
-                        <TeamCarousel teams={teams} game={activeTab} />
+                        {loading ? (
+                            <div className="flex items-center justify-center min-h-36 text-xs text-gray-500 animate-pulse font-mono tracking-widest uppercase">
+                                Synchronisation...
+                            </div>
+                        ) : (
+                            <TeamCarousel teams={teams} game={activeTab} />
+                        )}
                     </div>
                 </section>
 
@@ -95,7 +148,6 @@ export default function Home() {
 
                     {/* Liste des Accordions */}
                     <div className="space-y-3 pt-2">
-
                         {/* Accordion 1: LEAGUE OF LEGENDS */}
                         <div className={`bg-[#121214] rounded-xl border transition-colors duration-200 ${openAccordion === 'lol' ? 'border-[#c8aa6e]' : 'border-[#212124]'}`}>
                             <button
@@ -176,10 +228,8 @@ export default function Home() {
                                 </div>
                             )}
                         </div>
-
                     </div>
                 </section>
-
             </div>
         </main>
     );
@@ -231,58 +281,89 @@ function ActionCard({ title, description, icon }: { title: string; description: 
 }
 
 function TeamCarousel({ teams, game }: { teams: EquipeRow[]; game: 'Valorant' | 'League of Legends' }) {
+    const [currentIndex, setCurrentIndex] = useState<number>(0);
 
-    // 2. On prépare les styles dynamiques selon le jeu actif
+    // Force le carrousel à revenir au début (index 0) quand on change de jeu (Valo / LoL)
+    useEffect(() => {
+        setCurrentIndex(0);
+    }, [game, teams]);
+
+    // Si aucune équipe n'est chargée, on affiche un indicateur de sécurité
+    if (!teams || teams.length === 0) {
+        return (
+            <div className="text-center py-8 text-xs text-gray-500 font-mono uppercase tracking-widest">
+                Aucune équipe disponible
+            </div>
+        );
+    }
+
+    // Gestion du défilement infini (Circulaire)
+    const handlePrev = () => {
+        setCurrentIndex((prevIndex) => (prevIndex - 1 + teams.length) % teams.length);
+    };
+
+    const handleNext = () => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % teams.length);
+    };
+
+    // Calcul dynamique des 3 équipes à afficher (Gauche, Centre, Droite)
+    const leftTeam = teams[currentIndex];
+    const centerTeam = teams[(currentIndex + 1) % teams.length];
+    const rightTeam = teams[(currentIndex + 2) % teams.length];
+
+    const visibleTeams = [leftTeam, centerTeam, rightTeam];
+
+    // Préparation de la DA dynamique selon le jeu actif
     const isValo = game === 'Valorant';
-
-    const cardBorder = isValo
-        ? 'border-red-950/40'
-        : 'border-[#c8aa6e]/30'; // Or LoL
-
-    const gradientColor = isValo
-        ? 'from-[#360407]'
-        : 'from-[#1f180e]'; // Un joli fond dégradé doré très sombre
+    const cardBorder = isValo ? 'border-red-950/40' : 'border-[#c8aa6e]/30';
+    const gradientColor = isValo ? 'from-[#360407]' : 'from-[#1f180e]';
 
     return (
         <div className="relative flex items-center justify-center w-full overflow-hidden min-h-50">
             {/* Flèche Gauche */}
-            <button className="absolute left-0 z-20 text-gray-500 hover:text-white transition-colors bg-[#070708]/90 rounded-full p-0.5 cursor-pointer">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"/></svg>
+            <button
+                onClick={handlePrev}
+                className="absolute left-0 z-20 text-gray-500 hover:text-white transition-colors bg-[#070708]/90 rounded-full p-0.5 cursor-pointer active:scale-90"
+            >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"/>
+                </svg>
             </button>
 
-            {/* Grille */}
+            {/* Grille des 3 cartes physiques */}
             <div className="grid grid-cols-3 w-full gap-2 px-5 box-border items-center">
-                {teams.slice(0, 3).map((team, index) => {
+                {visibleTeams.map((team, index) => {
+                    // L'élément du milieu (index 1 de notre sélection) reste la vedette (Rang 01 + zoom)
                     const isCenter = index === 1;
                     const rankDisplay = isCenter ? "01" : "02";
 
                     return (
                         <div
-                            key={team.id}
-                            className={`relative flex flex-col items-center w-full transition-all duration-300 ${isCenter ? 'z-10 scale-105' : 'opacity-30 scale-95'}`}
+                            key={`${team.id}-${index}`} // Clé combinée pour éviter les conflits si le tableau a moins de 3 éléments
+                            className={`relative flex flex-col items-center w-full transition-all duration-300 ${isCenter ? 'z-10 scale-105 opacity-100' : 'opacity-30 scale-95'}`}
                         >
-                            {/* Le conteneur avec la bordure et le dégradé dynamiques 🚀 */}
+                            {/* Carte Graphique */}
                             <div className={`relative h-36 w-full rounded-lg overflow-hidden bg-[#111113] block border ${cardBorder}`}>
                                 <div className={`absolute inset-0 bg-linear-to-t via-transparent to-transparent z-10 opacity-90 ${gradientColor}`} />
 
                                 <img
-                                    src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80"
+                                    src={team.logo_url || "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80"}
                                     alt={team.nom || 'Équipe'}
                                     className="w-full h-full object-cover object-top block grayscale brightness-90 contrast-125"
                                 />
 
-                                {/* Crochet de rang */}
+                                {/* Crochet de rang (\___/) */}
                                 <div className="absolute bottom-2 left-0 right-0 z-20 flex flex-col items-center">
                                     <div className="relative w-4/5 h-3 flex items-end justify-center">
                                         <div className="absolute inset-x-0 bottom-0 border-b border-x border-white/60 h-2 rounded-b-md mx-1" />
                                         <span className="relative text-[8px] font-mono font-black bg-[#070708] px-1.5 py-0 rounded text-white border border-white/10 transform translate-y-1.5">
-                      {rankDisplay}
-                    </span>
+                                            {rankDisplay}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Label de l'équipe */}
+                            {/* Label Textuel sous la carte */}
                             <div className="w-full bg-[#1c1c1f] border border-[#29292e] text-center py-1 mt-3 rounded-md shadow-md overflow-hidden box-border">
                                 <p className="text-[9px] font-black tracking-wider text-gray-300 font-mono uppercase truncate px-1 m-0">
                                     {team.nom || 'XXX'}
@@ -294,8 +375,13 @@ function TeamCarousel({ teams, game }: { teams: EquipeRow[]; game: 'Valorant' | 
             </div>
 
             {/* Flèche Droite */}
-            <button className="absolute right-0 z-20 text-gray-500 hover:text-white transition-colors bg-[#070708]/90 rounded-full p-0.5 cursor-pointer">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
+            <button
+                onClick={handleNext}
+                className="absolute right-0 z-20 text-gray-500 hover:text-white transition-colors bg-[#070708]/90 rounded-full p-0.5 cursor-pointer active:scale-90"
+            >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                </svg>
             </button>
         </div>
     );
@@ -304,11 +390,11 @@ function TeamCarousel({ teams, game }: { teams: EquipeRow[]; game: 'Valorant' | 
 // --- ICONS & ARROWS ---
 
 function TrophyIcon() {
-    return <svg className="w-[16px] h-[16px] text-[#ff4655]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 14l0 7m-6-16h12m-12 0a2 2 0 00-2 2v3a2 2 0 002 2h2m8-7a2 2 0 012 2v3a2 2 0 01-2 2h-2m-8 0h8m-4-5v5" /></svg>;
+    return <svg className="w-4 h-4 text-[#ff4655]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 14l0 7m-6-16h12m-12 0a2 2 0 00-2 2v3a2 2 0 002 2h2m8-7a2 2 0 012 2v3a2 2 0 01-2 2h-2m-8 0h8m-4-5v5" /></svg>;
 }
 
 function SparklesIcon() {
-    return <svg className="w-[16px] h-[16px] text-[#ffb800]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>;
+    return <svg className="w-4 h-4 text-[#ffb800]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>;
 }
 
 function BookIcon() {
