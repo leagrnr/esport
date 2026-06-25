@@ -15,7 +15,7 @@ export default function Agenda() {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      const { data, error } = await (supabase as any)
+      const { data } = await (supabase as any)
         .from("programme")
         .select(
           `
@@ -26,12 +26,15 @@ export default function Agenda() {
         )
         .order("date_heure", { ascending: true });
 
+      console.log(data);
+
       if (data)
         setEvents(
           data.map((e: any) => ({
             id: String(e.id),
             title: `${e.equipe1.initial} vs ${e.equipe2.initial}`,
             location: e.lieu ?? "",
+            game: e.jeu_id === 2 ? "valorant" : e.jeu_id === 1 ? "lol" : "",
             time: new Date(e.date_heure),
           })),
         );
@@ -58,7 +61,7 @@ export default function Agenda() {
       {events
         .filter((event) => {
           if (showFavorites && !favorites.includes(event.id)) return false;
-          const dateStr = event.time.toISOString().split("T")[0]; // "2025-11-08"
+          const dateStr = event.time.toISOString().split("T")[0];
           if (activeDate === "Dimanche 8 nov.") return dateStr === "2025-11-08";
           if (activeDate === "Lundi 9 nov.") return dateStr === "2025-11-09";
           return true;
