@@ -3,29 +3,39 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  height: 52px;
+  padding-top: env(safe-area-inset-top);
+  height: calc(52px + env(safe-area-inset-top));
   background: #0d0d0d;
   flex-shrink: 0;
+  border-bottom: 1px solid #1e1e1e;
 }
 
 .header-logo {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
 }
 
 .header-burger {
   background: none;
   border: none;
-  padding: 0;
+  padding: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  transition: background 0.15s;
+}
+
+.header-burger:active {
+  background: #1e1e1e;
 }
