@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import Header from './components/Header/Header'
 import Navbar from './components/Navbar/Navbar'
-import Home from './pages/Home/Home'
+import Home from './pages/Home/Home.tsx'
 import Agenda from './pages/Agenda/Agenda'
 import Map from './pages/Map/Map'
 import Match from './pages/Match/Match'
