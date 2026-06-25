@@ -1,0 +1,226 @@
+.match-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 16px calc(80px + env(safe-area-inset-bottom));
+  background: #0d0d0d;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.score-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1b1b1b;
+  border: 1px solid rgba(230, 34, 38, 0.4);
+  border-radius: 14px;
+  padding: 14px 18px;
+}
+
+.score-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.score-label {
+  font-size: 13px;
+  color: #9ca3af;
+  letter-spacing: 0.3px;
+}
+
+.score-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #e62226;
+  line-height: 1.1;
+}
+
+.score-unit {
+  font-size: 13px;
+  font-weight: 400;
+  color: #9ca3af;
+}
+
+.score-won {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.pronos-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.pronos-tab {
+  flex: 1;
+  background: #1b1b1b;
+  border: 1px solid #2e2e2e;
+  border-radius: 12px;
+  padding: 12px 0;
+  font-size: 13px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  min-height: 44px;
+}
+
+.pronos-tab.active {
+  background: #720002;
+  border-color: #720002;
+  color: #fcfcfc;
+  font-weight: 600;
+}
+
+.pronos-tab:active {
+  opacity: 0.7;
+}
+
+/* Search bar */
+.match-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.match-search-icon {
+  position: absolute;
+  left: 12px;
+  color: #606060;
+  pointer-events: none;
+}
+.match-search {
+  width: 100%;
+  background: #1e1e1e;
+  border: 1px solid #2e2e2e;
+  border-radius: 12px;
+  padding: 11px 40px;
+  font-size: 14px;
+  color: #fcfcfc;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.match-search::placeholder { color: #606060; }
+.match-search:focus         { border-color: #444; }
+.match-search-clear {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #606060;
+  cursor: pointer;
+  display: flex;
+  padding: 4px;
+}
+
+.match-empty {
+  text-align: center;
+  color: #606060;
+  font-size: 14px;
+  padding: 32px 0;
+  margin: 0;
+}
+
+/* Game section headers */
+.game-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  margin-top: 4px;
+}
+.game-section-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.game-section-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; }
+.game-section-line { flex: 1; height: 1px; }
+.game-section-header--lol  .game-section-dot  { background: #C89B3C; }
+.game-section-header--lol  .game-section-name { color: #C89B3C; }
+.game-section-header--lol  .game-section-line { background: rgba(200,155,60,0.25); }
+.game-section-header--valo .game-section-dot  { background: #FF4655; }
+.game-section-header--valo .game-section-name { color: #FF4655; }
+.game-section-header--valo .game-section-line { background: rgba(255,70,85,0.25); }
+
+.game-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.game-filter {
+  flex: 1;
+  background: #1b1b1b;
+  border: 1px solid #2e2e2e;
+  border-radius: 20px;
+  padding: 7px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  min-height: 36px;
+}
+.game-filter.active { background: #2a2a2a; color: #fcfcfc; border-color: #444; }
+.game-filter:active { opacity: 0.7; }
+
+.match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.match-loading {
+  text-align: center;
+  color: #606060;
+  font-size: 14px;
+  padding: 32px 0;
+}
+
+/* Status filters */
+.status-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.status-filter {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: #1b1b1b;
+  border: 1px solid #2e2e2e;
+  border-radius: 20px;
+  padding: 7px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  min-height: 36px;
+  white-space: nowrap;
+}
+.status-filter:active { opacity: 0.7; }
+
+/* Dot animé pour En cours */
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #e62226;
+  animation: badge-pulse 1.4s infinite;
+  flex-shrink: 0;
+}
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* Couleurs actives par statut */
+.status-filter--tous.active      { background: #2a2a2a;                   color: #fcfcfc; border-color: #444; }
+.status-filter--en_cours.active  { background: rgba(230,34,38,0.15);      color: #e62226; border-color: rgba(230,34,38,0.4); }
+.status-filter--a_venir.active   { background: rgba(74,158,255,0.12);     color: #4a9eff; border-color: rgba(74,158,255,0.35); }
+.status-filter--termine.active   { background: rgba(156,163,175,0.12);    color: #9ca3af; border-color: rgba(156,163,175,0.35); }
+
+/* Couleurs au survol (inactive) */
+.status-filter--en_cours:not(.active):hover  { color: #e62226; border-color: rgba(230,34,38,0.3); }
+.status-filter--a_venir:not(.active):hover   { color: #4a9eff; border-color: rgba(74,158,255,0.3); }
+.status-filter--termine:not(.active):hover   { color: #9ca3af; border-color: rgba(156,163,175,0.3); }
