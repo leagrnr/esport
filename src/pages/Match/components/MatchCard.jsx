@@ -1,4 +1,6 @@
-import { Check, Lock, AlertCircle } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Lock, AlertCircle, ChevronDown } from 'lucide-react'
+import { useMatchPerformances } from '../../../hooks/useMatchPerformances'
 import './MatchCard.css'
 
 function getPoints(vote1, vote2, team) {
@@ -15,8 +17,24 @@ function StatusBadge({ statut, score, selected, activePts }) {
   return null
 }
 
+function PerfRow({ perf }) {
+  return (
+    <div className="perf-row">
+      <span className="perf-name">{perf.joueur?.nom ?? '—'}</span>
+      <span className="perf-perso">{perf.personnage ?? '—'}</span>
+      <span className="perf-kda">
+        <span className="perf-k">{perf.kills}</span>
+        <span className="perf-sep">/</span>
+        <span className="perf-d">{perf.morts}</span>
+        <span className="perf-sep">/</span>
+        <span className="perf-a">{perf.assistances}</span>
+      </span>
+    </div>
+  )
+}
+
 export default function MatchCard({ match, selected, pending, onVote, onConfirm, onCancel }) {
-  const { label, team1, team2, vote1, locked, logo1, logo2, statut, score } = match
+  const { label, team1, team2, vote1, locked, logo1, logo2, statut, score, equipe1_id, equipe2_id } = match
   const vote2    = 100 - vote1
   const choosing = pending && !selected
 
@@ -27,8 +45,14 @@ export default function MatchCard({ match, selected, pending, onVote, onConfirm,
                   : pending === 'team2' || selected === 'team2' ? pts2
                   : null
 
+  const [showStats, setShowStats] = useState(false)
+  const { performances, loading: loadingStats } = useMatchPerformances(match.id, showStats && statut === 'termine')
+
+  const team1Perf = performances.filter(p => p.equipe_id === equipe1_id)
+  const team2Perf = performances.filter(p => p.equipe_id === equipe2_id)
+
   return (
-    <div className={`match-card match-card--${statut}${selected ? ' match-card--voted' : ''}`}>
+    <div className={`match-card match-card--${statut}${selected ? ' match-card--voted' : ''}${showStats ? ' match-card--expanded' : ''}`}>
 
       <div className="match-header">
         <span className="match-game-tag">{label}</span>
@@ -100,6 +124,40 @@ export default function MatchCard({ match, selected, pending, onVote, onConfirm,
         </div>
         <span className="match-community">Paris de la communauté</span>
       </div>
+
+      {statut === 'termine' && (
+        <>
+          <button className="match-stats-toggle" onClick={() => setShowStats(s => !s)}>
+            <ChevronDown size={14} className={`match-stats-chevron${showStats ? ' match-stats-chevron--open' : ''}`} />
+            {showStats ? 'Masquer les stats' : 'Voir les stats'}
+          </button>
+
+          {showStats && (
+            <div className="match-stats">
+              {loadingStats ? (
+                <p className="match-stats-empty">Chargement…</p>
+              ) : performances.length === 0 ? (
+                <p className="match-stats-empty">Aucune stat disponible.</p>
+              ) : (
+                <>
+                  {team1Perf.length > 0 && (
+                    <div className="match-stats-group">
+                      <span className="match-stats-team-label">{team1}</span>
+                      {team1Perf.map(p => <PerfRow key={p.id} perf={p} />)}
+                    </div>
+                  )}
+                  {team2Perf.length > 0 && (
+                    <div className="match-stats-group">
+                      <span className="match-stats-team-label">{team2}</span>
+                      {team2Perf.map(p => <PerfRow key={p.id} perf={p} />)}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }

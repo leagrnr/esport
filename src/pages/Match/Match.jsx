@@ -171,6 +171,7 @@ export default function Match() {
 
       {activeTab === 1 && <TournoiContent />}
       {activeTab === 2 && <ClassementContent />}
+
     </main>
   )
 }

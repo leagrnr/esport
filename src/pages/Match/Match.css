@@ -179,22 +179,18 @@
 .status-filters {
   display: flex;
   gap: 8px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding-bottom: 2px;
 }
-.status-filters::-webkit-scrollbar { display: none; }
 
 .status-filter {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  flex-shrink: 0;
   background: #1b1b1b;
   border: 1px solid #2e2e2e;
   border-radius: 20px;
-  padding: 7px 14px;
+  padding: 7px 0;
   font-size: 12px;
   font-weight: 600;
   color: #9ca3af;

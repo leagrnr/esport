@@ -9,17 +9,19 @@ const JEU = {
 function toCard(m) {
   const jeu = JEU[m.jeu_id] ?? { game: 'lol', label: '' }
   return {
-    id:     m.id,
-    game:   jeu.game,
-    label:  jeu.label,
-    team1:  m.equipe1?.nom      ?? '?',
-    team2:  m.equipe2?.nom      ?? '?',
-    logo1:  m.equipe1?.logo_url,
-    logo2:  m.equipe2?.logo_url,
-    vote1:  30 + (m.id * 13) % 41,   // placeholder jusqu'à ce que la table vote soit remplie
-    locked: m.statut !== 'a_venir',
-    statut: m.statut,
-    score:  m.score,
+    id:         m.id,
+    game:       jeu.game,
+    label:      jeu.label,
+    team1:      m.equipe1?.nom      ?? '?',
+    team2:      m.equipe2?.nom      ?? '?',
+    logo1:      m.equipe1?.logo_url,
+    logo2:      m.equipe2?.logo_url,
+    equipe1_id: m.equipe1?.id,
+    equipe2_id: m.equipe2?.id,
+    vote1:      30 + (m.id * 13) % 41,
+    locked:     m.statut !== 'a_venir',
+    statut:     m.statut,
+    score:      m.score,
   }
 }
 

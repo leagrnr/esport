@@ -57,7 +57,6 @@ export default function TournoiContent() {
     groups[key].push(t)
   })
 
-  // Trier les groupes : plus de victoires d'abord, puis moins de défaites
   const sortedGroups = Object.entries(groups).sort(([a], [b]) => {
     const [aw, al] = a.split('-').map(Number)
     const [bw, bl] = b.split('-').map(Number)
