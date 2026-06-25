@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { MapPin, Star } from "lucide-react";
 
 export type EventCardProps = {

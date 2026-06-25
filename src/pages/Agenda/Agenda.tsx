@@ -2,44 +2,43 @@ import EventCard, { EventCardProps } from "../../components/Agenda/EventCard";
 import DateFilter from "../../components/Agenda/DateFilter";
 import FavoritesButton from "../../components/Agenda/FavoritesButton";
 import { useLocalStorage } from "@uidotdev/usehooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/SupabaseClient";
+
+type ProgrammeEvent = Omit<EventCardProps, "isFavorite" | "onToggleFavorite">;
 
 export default function Agenda() {
-  const events: Omit<EventCardProps, "isFavorite" | "onToggleFavorite">[] = [
-    {
-      time: new Date("2023-11-09T14:00:00"),
-      title: "Match de football",
-      location: "Stade de France",
-      id: "1",
-    },
-    {
-      time: new Date("2023-11-09T16:00:00"),
-      title: "Tournoi de jeux vidéo",
-      location: "Salle de jeux",
-      id: "2",
-    },
-    {
-      time: new Date("2023-11-09T18:00:00"),
-      title: "Concert de musique",
-      location: "Salle de concert",
-      id: "3",
-    },
-    {
-      time: new Date("2023-11-09T19:00:00"),
-      title: "Conférence sur l'IA",
-      location: "Centre de conférence",
-      id: "4",
-    },
-    {
-      time: new Date("2023-11-09T20:00:00"),
-      title: "Exposition d'art",
-      location: "Galerie d'art",
-      id: "5",
-    },
-  ];
-
+  const [events, setEvents] = useState<ProgrammeEvent[]>([]);
   const [favorites, saveFavorites] = useLocalStorage<string[]>("favorites", []);
   const [showFavorites, setShowFavorites] = useState<boolean>(false);
+  const [activeDate, setActiveDate] = useState<string>("Dimanche 8 nov.");
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const { data, error } = await (supabase as any)
+        .from("programme")
+        .select(
+          `
+    *,
+    equipe1:equipe1_id(initial),
+    equipe2:equipe2_id(initial)
+  `,
+        )
+        .order("date_heure", { ascending: true });
+
+      if (data)
+        setEvents(
+          data.map((e: any) => ({
+            id: String(e.id),
+            title: `${e.equipe1.initial} vs ${e.equipe2.initial}`,
+            location: e.lieu ?? "",
+            time: new Date(e.date_heure),
+          })),
+        );
+    };
+
+    fetchEvents();
+  }, []);
 
   return (
     <main className="w-full px-6">
@@ -49,7 +48,7 @@ export default function Agenda() {
       <div className="flex items-center justify-between mb-6">
         <DateFilter
           dates={["Dimanche 8 nov.", "Lundi 9 nov."]}
-          onDateChange={(date) => console.log(date)}
+          onDateChange={(date) => setActiveDate(date)}
         />
         <FavoritesButton
           onToggle={() => setShowFavorites((prev) => !prev)}
@@ -58,18 +57,22 @@ export default function Agenda() {
       </div>
       {events
         .filter((event) => {
-          if (!showFavorites) return true;
-          return favorites.includes(event.id);
+          if (showFavorites && !favorites.includes(event.id)) return false;
+          const dateStr = event.time.toISOString().split("T")[0]; // "2025-11-08"
+          if (activeDate === "Dimanche 8 nov.") return dateStr === "2025-11-08";
+          if (activeDate === "Lundi 9 nov.") return dateStr === "2025-11-09";
+          return true;
         })
         .map((event) => {
           const isFavorite = favorites.includes(event.id);
           return (
             <EventCard
+              key={event.id}
               {...event}
               onToggleFavorite={() => {
                 if (isFavorite) {
                   saveFavorites(
-                    favorites.filter((element) => event.id != element),
+                    favorites.filter((element) => event.id !== element),
                   );
                   return;
                 }
