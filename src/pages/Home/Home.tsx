@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/SupabaseClient';
 import type { Database } from '../../types/supabase';
 import {CountdownBanner} from '../../components/Accueil/CountdownBannner.tsx'
-import ActionCard from "../../components/Accueil/ActionCard.tsx";
 import {TeamCarousel} from "../../components/Accueil/TeamCarousel.tsx";
-import {BookIcon, ChevronIcon, SparklesIcon, TrophyIcon} from "../../components/Accueil/Icon.tsx";
+import {BookIcon, ChevronIcon} from "../../components/Accueil/Icon.tsx";
 
 
 type EquipeRow = Database['public']['Tables']['equipe']['Row'];
@@ -32,7 +31,6 @@ export default function Home() {
         async function loadTeams() {
             setLoading(true);
             try {
-                // Requête relationnelle : Récupère les équipes associées au jeu sélectionné
                 const { data, error } = await supabase
                     .from('equipe')
                     .select(`
@@ -52,7 +50,6 @@ export default function Home() {
                 if (error) throw error;
 
                 if (data && data.length > 0) {
-                    // Nettoyage et formatage du résultat pour correspondre à EquipeRow
                     const formattedTeams: EquipeRow[] = data.map(item => ({
                         id: item.id,
                         nom: item.nom,
@@ -61,14 +58,12 @@ export default function Home() {
                         initial: item.initial
                     }));
 
-                    // Retrait des doublons d'équipes si elles jouent plusieurs matchs
                     const uniqueTeams = formattedTeams.filter((value, index, self) =>
                         self.findIndex(t => t.id === value.id) === index
                     );
 
                     setTeams(uniqueTeams);
                 } else {
-                    // Fallback si la BDD renvoie un tableau vide
                     setTeams(activeTab === 'Valorant' ? MOCK_EQUIPES_VALO : MOCK_EQUIPES_LOL);
                 }
             } catch (err) {
@@ -95,18 +90,21 @@ export default function Home() {
             {/* Cadre global de l'application mobile */}
             <div className="w-full max-w-sm mx-auto px-4 mt-6 flex flex-col space-y-8 box-border">
 
-                {/* 2. CARTES D'ACTION RAPIDE */}
-                <section className="grid grid-cols-2 gap-3 w-full box-border">
-                    <ActionCard
-                        title="Pronostics"
-                        description="Joue avec tes amis dès maintenant"
-                        icon={<TrophyIcon />}
-                    />
-                    <ActionCard
-                        title="Associe ton pass"
-                        description="Compte gratuit + QR code d’entrée"
-                        icon={<SparklesIcon />}
-                    />
+                {/* 2. LIVE TWITCH */}
+                <section className="w-full space-y-3">
+                    <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#ff4655] animate-pulse shrink-0" />
+                        <h2 className="text-xl font-black tracking-wide uppercase m-0">Live</h2>
+                    </div>
+                    <div className="w-full rounded-xl overflow-hidden border border-[#1e1e1e]" style={{ aspectRatio: '16/9' }}>
+                        <iframe
+                            src={`https://player.twitch.tv/?channel=lyonesporttv&parent=${window.location.hostname}&autoplay=true&muted=true`}
+                            allowFullScreen
+                            allow="autoplay"
+                            className="w-full h-full"
+                            title="Twitch Live – LyonEsportTV"
+                        />
+                    </div>
                 </section>
 
                 {/* 3. SECTION ÉQUIPES */}
@@ -148,9 +146,9 @@ export default function Home() {
                             <BookIcon />
                         </div>
                         <div className="space-y-0.5">
-                            <h2 className="text-xl font-black tracking-wide uppercase m-0">Règle d’introduction</h2>
+                            <h2 className="text-xl font-black tracking-wide uppercase m-0">Règle d'introduction</h2>
                             <p className="text-[10px] text-gray-400 font-medium leading-tight">
-                                Tu n’as jamais regardé de e-sport ? Pas de problème, on t’explique tout
+                                Tu n'as jamais regardé de e-sport ? Pas de problème, on t'explique tout
                             </p>
                         </div>
                     </div>
