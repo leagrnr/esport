@@ -1,6 +1,6 @@
 import { useState } from 'react' // 🚀 Ajout de useState
 import { useNavigate } from 'react-router-dom' // 🚀 Ajout du hook de navigation
-import { UserCircle, Menu, X, Info, Home, Calendar, Map, Trophy } from 'lucide-react' // 🚀 Ajout des icônes pour le menu
+import { UserCircle, Menu, X, Info, Home, Calendar, Map, Trophy, BarChart2 } from 'lucide-react' // 🚀 Ajout des icônes pour le menu
 import { useAuth } from '../../contexts/AuthContext'
 import './Header.css'
 
@@ -60,25 +60,19 @@ export default function Header({ onOpenAuth }) {
 
                 {/* LIENS DE NAVIGATION CONNECTÉS */}
                 <nav className="flex flex-col space-y-1">
-                    <button onClick={() => handleNavigate("/")} className="flex items-center gap-3 text-sm font-bold text-gray-300 hover:text-white p-3 rounded-xl hover:bg-white/5 bg-transparent border-none w-full text-left cursor-pointer transition-colors">
-                        <Home size={18} className="text-gray-400" /> Accueil
-                    </button>
-                    <button onClick={() => handleNavigate("/programme")} className="flex items-center gap-3 text-sm font-bold text-gray-300 hover:text-white p-3 rounded-xl hover:bg-white/5 bg-transparent border-none w-full text-left cursor-pointer transition-colors">
-                        <Calendar size={18} className="text-gray-400" /> Programme
-                    </button>
-                    <button onClick={() => handleNavigate("/map")} className="flex items-center gap-3 text-sm font-bold text-gray-300 hover:text-white p-3 rounded-xl hover:bg-white/5 bg-transparent border-none w-full text-left cursor-pointer transition-colors">
-                        <Map size={18} className="text-gray-400" /> Carte du Stand
-                    </button>
-                    <button onClick={() => handleNavigate("/tournoi")} className="flex items-center gap-3 text-sm font-bold text-gray-300 hover:text-white p-3 rounded-xl hover:bg-white/5 bg-transparent border-none w-full text-left cursor-pointer transition-colors">
-                        <Trophy size={18} className="text-gray-400" /> Pronostics
-                    </button>
-
-                    {/* AJOUT DE LA PAGE INFOS PRATIQUES STYLE LYON E-SPORT 🚀 */}
                     <button
                         onClick={() => handleNavigate("/infos-pratiques")}
                         className="flex items-center gap-3 text-sm font-black text-[#ff4655] p-3 rounded-xl bg-[#ff4655]/5 border border-[#ff4655]/15 w-full text-left cursor-pointer hover:bg-[#ff4655]/10 transition-colors"
                     >
                         <Info size={18} /> Infos Pratiques
+                    </button>
+
+                    <button onClick={() => handleNavigate("/map")} className="flex items-center gap-3 text-sm font-bold text-gray-300 hover:text-white p-3 rounded-xl hover:bg-white/5 bg-transparent border-none w-full text-left cursor-pointer transition-colors">
+                        <Map size={18} className="text-gray-400" /> Carte du Stand
+                    </button>
+
+                    <button onClick={() => handleNavigate("/stats")} className="flex items-center gap-3 text-sm font-bold text-gray-300 hover:text-white p-3 rounded-xl hover:bg-white/5 bg-transparent border-none w-full text-left cursor-pointer transition-colors">
+                        <BarChart2 size={18} className="text-gray-400" /> Statistiques
                     </button>
                 </nav>
             </div>

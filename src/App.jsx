@@ -13,6 +13,7 @@ import Tournoi from './pages/Tournoi/Tournoi'
 import Affrontement from "./pages/Programme/Affrontement.tsx"
 import Admin from './pages/Admin/Admin'
 import PixelWar from './pages/PixelWar/PixelWar'
+import Stats from './pages/Stats/Stats'
 import TempsChaudBanner from './components/TempsChaudBanner'
 import './App.css'
 
@@ -32,6 +33,7 @@ function App() {
         <Route path="/affrontement/:matchId" element={<Affrontement />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/pixel-war" element={<PixelWar />} />
+        <Route path="/stats" element={<Stats />} />
         <Route path="/infos-pratiques" element={<InfosPratiques />} />
       </Routes>
       <Navbar />
