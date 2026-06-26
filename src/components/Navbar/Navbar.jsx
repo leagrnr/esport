@@ -5,7 +5,7 @@ const links = [
   { to: "/", label: "L'Event", Icon: Home },
   { to: "/programme", label: "Prog.", Icon: Calendar }, // Ajuste vers "/agenda" si ton ancienne route est conservée
   { to: "/pixel-war", label: "Pixel War", Icon: Sword },
-  { to: "/tournoi", label: "Prédi.", Icon: Trophy },     // Ajuste vers "/match" si ton ancienne route est conservée
+  { to: "/match", label: "Prédi.", Icon: Trophy },
   { to: "/map", label: "Quêtes", Icon: Map },
 ];
 
