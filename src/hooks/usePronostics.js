@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getUserPronostics } from '../lib/pixelWar'
 
-export function usePronostics(utilisateurId) {
+export function usePronostics(utilisateurId, refreshKey = 0) {
   const [pronostics, setPronostics] = useState([])
   const [loading, setLoading] = useState(false)
 
@@ -12,7 +12,7 @@ export function usePronostics(utilisateurId) {
       setPronostics(data)
       setLoading(false)
     })
-  }, [utilisateurId])
+  }, [utilisateurId, refreshKey])
 
   // Map matchId → { equipe_gagnante_id, est_correct, points_gagnes }
   const byMatch = Object.fromEntries(pronostics.map(p => [p.match_id, p]))

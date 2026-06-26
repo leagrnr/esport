@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Calendar, Shield, User, Users, ChevronLeft } from 'lucide-react'
+import { Calendar, Shield, User, Users, ChevronLeft, Sword } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 import AdminMatchs from './components/AdminMatchs'
 import AdminEquipes from './components/AdminEquipes'
 import AdminJoueurs from './components/AdminJoueurs'
 import AdminUtilisateurs from './components/AdminUtilisateurs'
+import AdminPixelWar from './components/AdminPixelWar'
 import './Admin.css'
 
 const TABS = [
@@ -14,6 +15,7 @@ const TABS = [
   { label: 'Équipes', icon: Shield },
   { label: 'Joueurs', icon: User },
   { label: 'Utilisateurs', icon: Users },
+  { label: 'Pixel War', icon: Sword },
 ]
 
 export default function Admin() {
@@ -98,6 +100,7 @@ export default function Admin() {
       {tab === 1 && <AdminEquipes />}
       {tab === 2 && <AdminJoueurs />}
       {tab === 3 && <AdminUtilisateurs />}
+      {tab === 4 && <AdminPixelWar />}
     </main>
   )
 }

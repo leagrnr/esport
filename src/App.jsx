@@ -13,6 +13,7 @@ import Tournoi from './pages/Tournoi/Tournoi'
 import Affrontement from "./pages/Programme/Affrontement.tsx"
 import Admin from './pages/Admin/Admin'
 import PixelWar from './pages/PixelWar/PixelWar'
+import TempsChaudBanner from './components/TempsChaudBanner'
 import './App.css'
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
   return (
     <AuthProvider>
       <Header onOpenAuth={() => setAuthOpen(true)} />
+      <TempsChaudBanner />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/agenda" element={<Programme />} />

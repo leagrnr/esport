@@ -1,15 +1,12 @@
-import { useState } from 'react'
-import { FlaskConical, RotateCcw } from 'lucide-react'
+import { Flame } from 'lucide-react'
 import { usePixelWar } from '../../hooks/usePixelWar'
-import { useAuth } from '../../contexts/AuthContext'
-import { GRID_COLS, GRID_ROWS, GRID_TOTAL, getLolTotal, getValoTotal, resetPixelWar } from '../../lib/pixelWar'
-import { runSeedDemo } from '../../lib/seedDemo'
+import { GRID_COLS, GRID_ROWS, GRID_TOTAL, getLolTotal, getValoTotal } from '../../lib/pixelWar'
 import './PixelWar.css'
 
 const LOL_COLOR  = '#c8aa6e'
 const VALO_COLOR = '#ff4655'
 
-function CampCard({ score, color, name, total }) {
+function CampCard({ score, color, name, total, chaud }) {
   const pct = total > 0 ? ((score.pixels_debloques / total) * 100).toFixed(1) : '0.0'
   return (
     <div className="pw-camp-card" style={{ '--camp-color': color }}>
@@ -25,47 +22,14 @@ function CampCard({ score, color, name, total }) {
       </div>
       <div className="pw-camp-pixels">
         <span className="pw-camp-pct">{pct}%</span>
-        <span className="pw-camp-px">{score.pixels_debloques} px</span>
+        <span className="pw-camp-px">{score.pixels_debloques} px{chaud ? ' ×2' : ''}</span>
       </div>
     </div>
   )
 }
 
 export default function PixelWar() {
-  const { grid, lol, valo, loading } = usePixelWar()
-  const { profile } = useAuth()
-  const [seeding, setSeeding] = useState(false)
-  const [seedMsg, setSeedMsg] = useState('')
-  const [resetting, setResetting] = useState(false)
-  const [resetMsg, setResetMsg] = useState('')
-
-  async function handleSeed() {
-    if (!window.confirm('Insérer les données de démo ? (15 spectateurs fictifs + 3 matchs résolus)')) return
-    setSeedMsg('')
-    setSeeding(true)
-    try {
-      await runSeedDemo()
-      setSeedMsg('Démo chargée !')
-    } catch (e) {
-      setSeedMsg(`Erreur : ${e.message}`)
-    } finally {
-      setSeeding(false)
-    }
-  }
-
-  async function handleReset() {
-    if (!window.confirm('Remettre le Pixel War à zéro ? Tous les scores des camps seront effacés.')) return
-    setResetMsg('')
-    setResetting(true)
-    try {
-      await resetPixelWar()
-      setResetMsg('Pixel War réinitialisé.')
-    } catch (e) {
-      setResetMsg(`Erreur : ${e.message}`)
-    } finally {
-      setResetting(false)
-    }
-  }
+  const { grid, lol, valo, loading, chaud } = usePixelWar()
 
   const lolTotal  = getLolTotal()
   const valoTotal = getValoTotal()
@@ -75,16 +39,24 @@ export default function PixelWar() {
   return (
     <main className="pw-page">
       <div className="pw-header">
-        <h1 className="pw-title">Pixel War</h1>
+        <h1 className="pw-title">
+          Pixel War
+          {chaud && <span className="pw-chaud-badge"><Flame size={14} /> ×2</span>}
+        </h1>
         <p className="pw-subtitle">
           Chaque pronostic correct débloque des pixels pour ton camp.
           Le score est calculé en <strong>moyenne par participant</strong> — pour rester équitable même si les camps ne sont pas égaux.
         </p>
+        {chaud && (
+          <p className="pw-chaud-notice">
+            <Flame size={12} /> Temps chaud actif — chaque pixel compte double !
+          </p>
+        )}
       </div>
 
       <div className="pw-camp-cards">
-        <CampCard score={lol}  color={LOL_COLOR}  name="League of Legends" total={lolTotal} />
-        <CampCard score={valo} color={VALO_COLOR} name="Valorant"           total={valoTotal} />
+        <CampCard score={lol}  color={LOL_COLOR}  name="League of Legends" total={lolTotal} chaud={chaud} />
+        <CampCard score={valo} color={VALO_COLOR} name="Valorant"           total={valoTotal} chaud={chaud} />
       </div>
 
       <div className="pw-grid-wrap">
@@ -93,7 +65,7 @@ export default function PixelWar() {
         ) : (
           <>
             <div
-              className="pw-grid"
+              className={`pw-grid${chaud ? ' pw-grid--chaud' : ''}`}
               style={{ '--cols': GRID_COLS, '--rows': GRID_ROWS }}
             >
               {grid.map((camp, i) => (
@@ -130,21 +102,6 @@ export default function PixelWar() {
       <div className="pw-grid-info">
         <span>Cristal : {lolTotal} px · Radar : {valoTotal} px · seuil 5 pts moy. = 1 px</span>
       </div>
-
-      {profile?.role === 'admin' && (
-        <div className="pw-demo-bar">
-          <button className="pw-demo-btn" disabled={seeding} onClick={handleSeed}>
-            <FlaskConical size={15} />
-            {seeding ? 'Chargement…' : 'Charger la démo'}
-          </button>
-          {seedMsg && <p className="pw-demo-msg">{seedMsg}</p>}
-          <button className="pw-demo-btn pw-reset-btn" disabled={resetting} onClick={handleReset}>
-            <RotateCcw size={15} />
-            {resetting ? 'Réinitialisation…' : 'Reset Pixel War'}
-          </button>
-          {resetMsg && <p className="pw-demo-msg pw-reset-msg">{resetMsg}</p>}
-        </div>
-      )}
     </main>
   )
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, X } from 'lucide-react'
+import { Search, X, Flame } from 'lucide-react'
 import MatchCard from './components/MatchCard'
 import TournoiContent from '../Tournoi/components/TournoiContent'
 import ClassementContent from './components/ClassementContent'
@@ -31,27 +31,32 @@ function GameHeader({ game }) {
 export default function Match() {
   const [activeTab, setActiveTab]   = useState(0)
   const [pending, setPending]       = useState({})
+  const [refreshKey, setRefreshKey] = useState(0)
   const [gameFilter,   setGameFilter]   = useState('Tous')
   const [statusFilter, setStatusFilter] = useState('tous')
+  const [chaudOnly,    setChaudOnly]    = useState(false)
   const [search,       setSearch]       = useState('')
 
   const { matches, loading }    = useMatches()
   const { profile }             = useAuth()
-  const { byMatch, loading: loadingPronos } = usePronostics(profile?.id)
+  const { byMatch, loading: loadingPronos } = usePronostics(profile?.id, refreshKey)
+
+  const canVote = profile?.role === 'spectateur' && !!profile?.camp
+  const noVoteReason = !profile ? 'connexion' : !profile.camp ? 'camp' : null
 
   async function confirmVote(matchId) {
+    if (!canVote) return
     const team  = pending[matchId]
     const match = matches.find(m => m.id === matchId)
     if (!match || !team) return
 
     const equipeId = team === 'team1' ? match.equipe1_id : match.equipe2_id
 
-    if (profile?.id) {
-      try {
-        await soumettrePronositc(profile.id, matchId, equipeId)
-      } catch (e) {
-        if (!e.message?.includes('duplicate')) console.error(e)
-      }
+    try {
+      await soumettrePronositc(profile.id, matchId, equipeId)
+      setRefreshKey(k => k + 1)
+    } catch (e) {
+      if (!e.message?.includes('duplicate')) console.error(e)
     }
 
     setPending(prev => { const n = { ...prev }; delete n[matchId]; return n })
@@ -61,13 +66,16 @@ export default function Match() {
     setPending(prev => { const n = { ...prev }; delete n[matchId]; return n })
   }
 
-  // Merge DB pronostics with local pending
   function getSelected(match) {
-    const dbPronos = byMatch[match.id]
-    if (dbPronos) {
-      return dbPronos.equipe_gagnante_id === match.equipe1_id ? 'team1' : 'team2'
-    }
-    return undefined
+    const p = byMatch[match.id]
+    if (!p) return undefined
+    return p.equipe_gagnante_id === match.equipe1_id ? 'team1' : 'team2'
+  }
+
+  function getBetResult(match) {
+    const p = byMatch[match.id]
+    if (!p) return null
+    return { correct: p.est_correct, points: p.points_gagnes }
   }
 
   const q = search.toLowerCase().trim()
@@ -75,7 +83,8 @@ export default function Match() {
     const gameOk   = gameFilter === 'Tous' || (gameFilter === 'LoL' ? m.game === 'lol' : m.game === 'valo')
     const statusOk = statusFilter === 'tous' || m.statut === statusFilter
     const searchOk = !q || m.team1.toLowerCase().includes(q) || m.team2.toLowerCase().includes(q)
-    return gameOk && statusOk && searchOk
+    const chaudOk  = !chaudOnly || m.tempsChaud
+    return gameOk && statusOk && searchOk && chaudOk
   })
 
   const lolMatches  = filtered.filter(m => m.game === 'lol')
@@ -91,8 +100,10 @@ export default function Match() {
         key={match.id}
         match={match}
         selected={getSelected(match)}
-        pending={pending[match.id]}
-        onVote={(team) => setPending(prev => ({ ...prev, [match.id]: team }))}
+        betResult={getBetResult(match)}
+        pending={canVote ? pending[match.id] : undefined}
+        noVoteReason={noVoteReason}
+        onVote={(team) => canVote && setPending(prev => ({ ...prev, [match.id]: team }))}
         onConfirm={() => confirmVote(match.id)}
         onCancel={() => cancelVote(match.id)}
       />
@@ -148,6 +159,12 @@ export default function Match() {
                 {f}
               </button>
             ))}
+            <button
+              className={`game-filter chaud-filter${chaudOnly ? ' active' : ''}`}
+              onClick={() => setChaudOnly(v => !v)}
+            >
+              <Flame size={12} /> Temps chaud
+            </button>
           </div>
 
           <div className="status-filters">

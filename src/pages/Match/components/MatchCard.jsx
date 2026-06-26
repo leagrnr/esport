@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, Lock, AlertCircle, ChevronDown } from 'lucide-react'
+import { Check, Lock, AlertCircle, ChevronDown, Flame } from 'lucide-react'
 import { useMatchPerformances } from '../../../hooks/useMatchPerformances'
 import './MatchCard.css'
 
@@ -33,8 +33,16 @@ function PerfRow({ perf }) {
   )
 }
 
-export default function MatchCard({ match, selected, pending, onVote, onConfirm, onCancel }) {
-  const { label, team1, team2, vote1, locked, logo1, logo2, statut, score, equipe1_id, equipe2_id } = match
+const NO_VOTE_MSG = {
+  connexion: 'Connecte-toi pour parier',
+  camp: 'Choisis ton camp pour parier',
+}
+
+export default function MatchCard({ match, selected, betResult, pending, noVoteReason, onVote, onConfirm, onCancel }) {
+  const { label, team1, team2, vote1, locked, logo1, logo2, statut, score, equipe1_id, equipe2_id, tempsChaud, gagnantId } = match
+
+  const team1Win = statut === 'termine' && gagnantId === equipe1_id
+  const team2Win = statut === 'termine' && gagnantId === equipe2_id
   const vote2    = 100 - vote1
   const choosing = pending && !selected
 
@@ -52,11 +60,14 @@ export default function MatchCard({ match, selected, pending, onVote, onConfirm,
   const team2Perf = performances.filter(p => p.equipe_id === equipe2_id)
 
   return (
-    <div className={`match-card match-card--${statut}${selected ? ' match-card--voted' : ''}${showStats ? ' match-card--expanded' : ''}`}>
+    <div className={`match-card match-card--${statut}${selected ? ' match-card--voted' : ''}${showStats ? ' match-card--expanded' : ''}${tempsChaud ? ' match-card--chaud' : ''}`}>
 
       <div className="match-header">
         <span className="match-game-tag">{label}</span>
-        <StatusBadge statut={statut} score={score} selected={selected} activePts={activePts} />
+        <div className="match-header-right">
+          {tempsChaud && <span className="match-chaud-badge"><Flame size={11} /> ×2</span>}
+          <StatusBadge statut={statut} score={score} selected={selected} activePts={activePts} />
+        </div>
       </div>
 
       <div className="match-teams">
@@ -64,9 +75,11 @@ export default function MatchCard({ match, selected, pending, onVote, onConfirm,
           className={`team-btn
             ${pending === 'team1' || selected === 'team1' ? ' selected' : ''}
             ${(pending && pending !== 'team1') || (selected && selected !== 'team1') ? ' dimmed' : ''}
+            ${team1Win ? ' team-btn--winner' : ''}
+            ${team2Win ? ' team-btn--loser' : ''}
           `}
-          onClick={() => !locked && !selected && onVote('team1')}
-          disabled={locked || !!selected}
+          onClick={() => !locked && !selected && !noVoteReason && onVote('team1')}
+          disabled={locked || !!selected || !!noVoteReason}
         >
           {logo1
             ? <img className="team-avatar" src={logo1} alt={team1} />
@@ -77,20 +90,31 @@ export default function MatchCard({ match, selected, pending, onVote, onConfirm,
             <span className="team-pct">{vote1}%</span>
             <span className="team-pts">+{pts1} pts</span>
           </div>
-          {(pending === 'team1' || selected === 'team1') && <span className="team-check"><Check size={14} /></span>}
+          {(pending === 'team1' || selected === 'team1') && (
+            <span className="team-my-bet">
+              {selected === 'team1' && statut === 'termine'
+                ? betResult?.correct ? `+${betResult.points} pts` : 'Raté'
+                : 'Mon pari'}
+            </span>
+          )}
         </button>
 
         <div className="match-vs">
-          {statut === 'en_cours' ? <span className="vs-live-dot" /> : locked ? <Lock size={14} className="vs-lock" /> : 'VS'}
+          {statut === 'en_cours' ? <span className="vs-live-dot" />
+           : statut === 'termine' ? <span className="vs-score">{score ?? '—'}</span>
+           : locked ? <Lock size={14} className="vs-lock" />
+           : 'VS'}
         </div>
 
         <button
           className={`team-btn
             ${pending === 'team2' || selected === 'team2' ? ' selected' : ''}
             ${(pending && pending !== 'team2') || (selected && selected !== 'team2') ? ' dimmed' : ''}
+            ${team2Win ? ' team-btn--winner' : ''}
+            ${team1Win ? ' team-btn--loser' : ''}
           `}
-          onClick={() => !locked && !selected && onVote('team2')}
-          disabled={locked || !!selected}
+          onClick={() => !locked && !selected && !noVoteReason && onVote('team2')}
+          disabled={locked || !!selected || !!noVoteReason}
         >
           {logo2
             ? <img className="team-avatar" src={logo2} alt={team2} />
@@ -101,9 +125,23 @@ export default function MatchCard({ match, selected, pending, onVote, onConfirm,
             <span className="team-pct">{vote2}%</span>
             <span className="team-pts">+{pts2} pts</span>
           </div>
-          {(pending === 'team2' || selected === 'team2') && <span className="team-check"><Check size={14} /></span>}
+          {(pending === 'team2' || selected === 'team2') && (
+            <span className="team-my-bet">
+              {selected === 'team2' && statut === 'termine'
+                ? betResult?.correct ? `+${betResult.points} pts` : 'Raté'
+                : 'Mon pari'
+              }
+            </span>
+          )}
         </button>
       </div>
+
+      {noVoteReason && !locked && (
+        <div className="match-no-vote">
+          <Lock size={11} />
+          {NO_VOTE_MSG[noVoteReason]}
+        </div>
+      )}
 
       {choosing && (
         <div className="match-confirm">

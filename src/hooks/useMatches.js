@@ -22,6 +22,8 @@ function toCard(m) {
     locked:     m.statut !== 'a_venir',
     statut:     m.statut,
     score:      m.score,
+    gagnantId:  m.gagnant_id ?? null,
+    tempsChaud: m.temps_chaud ?? false,
   }
 }
 
@@ -34,14 +36,15 @@ export function useMatches() {
   useEffect(() => {
     supabase
       .from('match')
-      .select('id,statut,score,jeu_id,date_heure,equipe1:equipe1_id(id,nom,logo_url),equipe2:equipe2_id(id,nom,logo_url)')
+      .select('id,statut,score,jeu_id,date_heure,temps_chaud,gagnant_id,equipe1:equipe1_id(id,nom,logo_url),equipe2:equipe2_id(id,nom,logo_url)')
       .order('statut', { ascending: true })
       .order('date_heure', { ascending: true })
       .then(({ data, error }) => {
         if (!error && data) {
-          const sorted = [...data].sort(
-            (a, b) => (STATUT_ORDER[a.statut] ?? 3) - (STATUT_ORDER[b.statut] ?? 3)
-          )
+          const sorted = [...data].sort((a, b) => {
+            if (b.temps_chaud !== a.temps_chaud) return b.temps_chaud ? 1 : -1
+            return (STATUT_ORDER[a.statut] ?? 3) - (STATUT_ORDER[b.statut] ?? 3)
+          })
           setMatches(sorted.map(toCard))
         }
         setLoading(false)
