@@ -1,4 +1,3 @@
-import { useState } from "react";
 import ScanCard from "../../components/Quetes/questScan";
 import QuestProgression from "../../components/Quetes/questProgression";
 import { useLocalStorage } from "@uidotdev/usehooks";

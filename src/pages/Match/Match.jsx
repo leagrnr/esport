@@ -4,6 +4,9 @@ import MatchCard from './components/MatchCard'
 import TournoiContent from '../Tournoi/components/TournoiContent'
 import ClassementContent from './components/ClassementContent'
 import { useMatches } from '../../hooks/useMatches'
+import { usePronostics } from '../../hooks/usePronostics'
+import { useAuth } from '../../contexts/AuthContext'
+import { soumettrePronositc } from '../../lib/pixelWar'
 import './Match.css'
 
 const TABS           = ['Mes paris', 'Tableau', 'Résultats']
@@ -27,25 +30,44 @@ function GameHeader({ game }) {
 
 export default function Match() {
   const [activeTab, setActiveTab]   = useState(0)
-  const [voted, setVoted]           = useState({})
   const [pending, setPending]       = useState({})
   const [gameFilter,   setGameFilter]   = useState('Tous')
   const [statusFilter, setStatusFilter] = useState('tous')
   const [search,       setSearch]       = useState('')
 
-  const { matches, loading } = useMatches()
+  const { matches, loading }    = useMatches()
+  const { profile }             = useAuth()
+  const { byMatch, loading: loadingPronos } = usePronostics(profile?.id)
 
-  function handleVote(matchId, team) {
-    setPending((prev) => ({ ...prev, [matchId]: team }))
-  }
+  async function confirmVote(matchId) {
+    const team  = pending[matchId]
+    const match = matches.find(m => m.id === matchId)
+    if (!match || !team) return
 
-  function confirmVote(matchId) {
-    setVoted((prev) => ({ ...prev, [matchId]: pending[matchId] }))
-    setPending((prev) => { const n = { ...prev }; delete n[matchId]; return n })
+    const equipeId = team === 'team1' ? match.equipe1_id : match.equipe2_id
+
+    if (profile?.id) {
+      try {
+        await soumettrePronositc(profile.id, matchId, equipeId)
+      } catch (e) {
+        if (!e.message?.includes('duplicate')) console.error(e)
+      }
+    }
+
+    setPending(prev => { const n = { ...prev }; delete n[matchId]; return n })
   }
 
   function cancelVote(matchId) {
-    setPending((prev) => { const n = { ...prev }; delete n[matchId]; return n })
+    setPending(prev => { const n = { ...prev }; delete n[matchId]; return n })
+  }
+
+  // Merge DB pronostics with local pending
+  function getSelected(match) {
+    const dbPronos = byMatch[match.id]
+    if (dbPronos) {
+      return dbPronos.equipe_gagnante_id === match.equipe1_id ? 'team1' : 'team2'
+    }
+    return undefined
   }
 
   const q = search.toLowerCase().trim()
@@ -60,30 +82,31 @@ export default function Match() {
   const valoMatches = filtered.filter(m => m.game === 'valo')
   const showBoth    = gameFilter === 'Tous'
 
+  const pronostiquesCount = Object.keys(byMatch).length
+  const pointsTotal = Object.values(byMatch).reduce((acc, p) => acc + (p.points_gagnes ?? 0), 0)
+
   function renderCards(list) {
     return list.map((match) => (
       <MatchCard
         key={match.id}
         match={match}
-        selected={voted[match.id]}
+        selected={getSelected(match)}
         pending={pending[match.id]}
-        onVote={(team) => handleVote(match.id, team)}
+        onVote={(team) => setPending(prev => ({ ...prev, [match.id]: team }))}
         onConfirm={() => confirmVote(match.id)}
         onCancel={() => cancelVote(match.id)}
       />
     ))
   }
 
-  const wonCount = Object.keys(voted).length
-
   return (
     <main className="match-page">
       <div className="score-card">
         <div className="score-left">
           <span className="score-label">Mon score</span>
-          <span className="score-value">0 <span className="score-unit">pts</span></span>
+          <span className="score-value">{pointsTotal} <span className="score-unit">pts</span></span>
         </div>
-        <span className="score-won">{wonCount} pari(s) placé(s)</span>
+        <span className="score-won">{pronostiquesCount} pari(s) placé(s)</span>
       </div>
 
       <div className="pronos-tabs">
@@ -140,7 +163,7 @@ export default function Match() {
             ))}
           </div>
 
-          {loading ? (
+          {loading || loadingPronos ? (
             <div className="match-loading">Chargement des matchs…</div>
           ) : filtered.length === 0 ? (
             <p className="match-empty">Aucun match trouvé.</p>
@@ -171,7 +194,6 @@ export default function Match() {
 
       {activeTab === 1 && <TournoiContent />}
       {activeTab === 2 && <ClassementContent />}
-
     </main>
   )
 }
