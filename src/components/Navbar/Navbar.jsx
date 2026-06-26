@@ -1,14 +1,14 @@
-import { NavLink } from 'react-router-dom'
-import { Home, Calendar, Map, Trophy, Sword } from 'lucide-react'
-import './Navbar.css'
+import { NavLink } from "react-router-dom";
+import { Home, Calendar, Map, Trophy, Sword } from "lucide-react";
+import "./Navbar.css";
 
 const links = [
-  { to: '/',          label: 'Home',      Icon: Home },
-  { to: '/agenda',    label: 'Agenda',    Icon: Calendar },
-  { to: '/map',       label: 'Map',       Icon: Map },
-  { to: '/match',     label: 'Match',     Icon: Trophy },
-  { to: '/pixel-war', label: 'Pixel War', Icon: Sword },
-]
+  { to: "/", label: "Home", Icon: Home },
+  { to: "/agenda", label: "Programme", Icon: Calendar },
+  { to: "/map", label: "Quêtes", Icon: Map },
+  { to: "/match", label: "Match", Icon: Trophy },
+  { to: "/pixel-war", label: "Pixel War", Icon: Sword },
+];
 
 export default function Navbar() {
   return (
@@ -17,8 +17,8 @@ export default function Navbar() {
         <NavLink
           key={to}
           to={to}
-          end={to === '/'}
-          className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+          end={to === "/"}
+          className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
         >
           <div className="nav-icon-wrapper">
             <Icon size={24} className="nav-icon" />
@@ -27,5 +27,5 @@ export default function Navbar() {
         </NavLink>
       ))}
     </nav>
-  )
+  );
 }

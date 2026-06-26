@@ -34,7 +34,6 @@ export default function Programme() {
         .order("date_heure", { ascending: true });
 
       if (data)
-        // Dans le useEffect de ton fichier Programme.tsx, modifie le data.map comme ceci :
         setEvents(
           data.map((e: any) => ({
             id: String(e.id),
@@ -53,10 +52,10 @@ export default function Programme() {
   }, []);
 
   return (
-    <main className="w-full px-6 pb-25">
-      <h1 className="text-xl font-bold font-archivo-black text-white mb-4 text-left pl-6">
+    <main className="w-full px-6 pb-36">
+      <p className="text-gray-100 text-xl font-black tracking-wider uppercase leading-tight mb-4 pt-2 pb-4 text-left">
         Programme
-      </h1>
+      </p>
       <div className="flex items-center justify-between mb-6">
         <DateFilter
           dates={["Dimanche 8 nov.", "Lundi 9 nov."]}
@@ -72,7 +71,7 @@ export default function Programme() {
         {events
           .filter((event) => {
             if (showFavorites && !favorites.includes(event.id)) return false;
-            const dateStr = event.time.toISOString().split("T")[0]; // "2025-11-08"
+            const dateStr = event.time.toISOString().split("T")[0];
             if (activeDate === "Dimanche 8 nov.")
               return dateStr === "2025-11-08";
             if (activeDate === "Lundi 9 nov.") return dateStr === "2025-11-09";

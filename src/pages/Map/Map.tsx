@@ -1,4 +1,3 @@
-import { useState } from "react";
 import ScanCard from "../../components/Quetes/questScan";
 import QuestProgression from "../../components/Quetes/questProgression";
 import { useLocalStorage } from "@uidotdev/usehooks";
@@ -22,12 +21,9 @@ export default function Map() {
 
   return (
     <main className="w-full px-6 pb-36">
-      <h1
-        style={{ fontFamily: "'Archivo Black', sans-serif" }}
-        className="text-xl text-white mb-4 text-left"
-      >
+      <p className="text-gray-100 text-xl font-black tracking-wider uppercase leading-tight mb-4 pt-2 pb-4 text-left">
         Quêtes
-      </h1>
+      </p>
       <QuestProgression
         title="Quête des stands"
         current={scanned.length}
