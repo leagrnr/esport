@@ -11,6 +11,7 @@ import Match from './pages/Match/Match'
 import Tournoi from './pages/Tournoi/Tournoi'
 import Affrontement from "./pages/Programme/Affrontement.tsx"
 import Admin from './pages/Admin/Admin'
+import PixelWar from './pages/PixelWar/PixelWar'
 import './App.css'
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
         <Route path="/tournoi" element={<Tournoi />} />
         <Route path="/affrontement/:matchId" element={<Affrontement />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/pixel-war" element={<PixelWar />} />
       </Routes>
       <Navbar />
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />

@@ -1,12 +1,13 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Calendar, Map, Trophy } from 'lucide-react'
+import { Home, Calendar, Map, Trophy, Sword } from 'lucide-react'
 import './Navbar.css'
 
 const links = [
-  { to: '/', label: 'Home', Icon: Home },
-  { to: '/agenda', label: 'Programme', Icon: Calendar },
-  { to: '/map', label: 'Map', Icon: Map },
-  { to: '/match', label: 'Match', Icon: Trophy },
+  { to: '/',          label: 'Home',      Icon: Home },
+  { to: '/agenda',    label: 'Agenda',    Icon: Calendar },
+  { to: '/map',       label: 'Map',       Icon: Map },
+  { to: '/match',     label: 'Match',     Icon: Trophy },
+  { to: '/pixel-war', label: 'Pixel War', Icon: Sword },
 ]
 
 export default function Navbar() {

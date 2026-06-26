@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, CheckCircle } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
+import { resoudreMatch } from '../../../lib/pixelWar'
 import AdminFormModal, { Field } from './AdminFormModal'
 
 const JEUX = [
@@ -13,21 +14,22 @@ const STATUTS = [
   { value: 'termine', label: 'Terminé' },
 ]
 
-const EMPTY = { jeu_id: '1', equipe1_id: '', equipe2_id: '', date_heure: '', phase: '', statut: 'a_venir', score: '' }
+const EMPTY = { jeu_id: '1', equipe1_id: '', equipe2_id: '', date_heure: '', phase: '', statut: 'a_venir', score: '', gagnant_id: '' }
 
 export default function AdminMatchs() {
   const [matches, setMatches] = useState([])
   const [equipes, setEquipes] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [resolvingId, setResolvingId] = useState(null)
   const [open, setOpen] = useState(false)
   const [form, setForm] = useState(EMPTY)
   const [editId, setEditId] = useState(null)
   const [error, setError] = useState('')
 
-  useEffect(() => { fetch() }, [])
+  useEffect(() => { load() }, [])
 
-  async function fetch() {
+  async function load() {
     const [mRes, eRes] = await Promise.all([
       supabase.from('match')
         .select('*, equipe1:equipe1_id(id,nom), equipe2:equipe2_id(id,nom)')
@@ -48,13 +50,14 @@ export default function AdminMatchs() {
 
   function openEdit(m) {
     setForm({
-      jeu_id: String(m.jeu_id || 1),
-      equipe1_id: String(m.equipe1_id || m.equipe1?.id || ''),
-      equipe2_id: String(m.equipe2_id || m.equipe2?.id || ''),
-      date_heure: m.date_heure ? m.date_heure.slice(0, 16) : '',
-      phase: m.phase || '',
-      statut: m.statut || 'a_venir',
-      score: m.score || '',
+      jeu_id:      String(m.jeu_id || 1),
+      equipe1_id:  String(m.equipe1_id || m.equipe1?.id || ''),
+      equipe2_id:  String(m.equipe2_id || m.equipe2?.id || ''),
+      date_heure:  m.date_heure ? m.date_heure.slice(0, 16) : '',
+      phase:       m.phase || '',
+      statut:      m.statut || 'a_venir',
+      score:       m.score || '',
+      gagnant_id:  String(m.gagnant_id || ''),
     })
     setEditId(m.id)
     setError('')
@@ -68,13 +71,14 @@ export default function AdminMatchs() {
     if (form.equipe1_id === form.equipe2_id) { setError('Les deux équipes doivent être différentes'); return }
     setSaving(true)
     const payload = {
-      jeu_id: Number(form.jeu_id),
+      jeu_id:     Number(form.jeu_id),
       equipe1_id: Number(form.equipe1_id),
       equipe2_id: Number(form.equipe2_id),
       date_heure: form.date_heure || null,
-      phase: form.phase || null,
-      statut: form.statut,
-      score: form.score || null,
+      phase:      form.phase || null,
+      statut:     form.statut,
+      score:      form.score || null,
+      gagnant_id: form.gagnant_id ? Number(form.gagnant_id) : null,
     }
     const { error: err } = editId
       ? await supabase.from('match').update(payload).eq('id', editId)
@@ -82,18 +86,44 @@ export default function AdminMatchs() {
     setSaving(false)
     if (err) { setError(err.message); return }
     setOpen(false)
-    fetch()
+    load()
   }
 
   async function handleDelete(id) {
     if (!window.confirm('Supprimer ce match ?')) return
     await supabase.from('match').delete().eq('id', id)
-    fetch()
+    load()
+  }
+
+  async function handleResoudre(m) {
+    if (!m.gagnant_id) {
+      alert("Définis d'abord l'équipe gagnante dans le formulaire d'édition.")
+      return
+    }
+    if (!window.confirm(`Résoudre les pronostics de ce match ? (gagnant : ${m.gagnant_id === m.equipe1?.id ? m.equipe1.nom : m.equipe2?.nom})`)) return
+    setResolvingId(m.id)
+    try {
+      const result = await resoudreMatch(m.id, m.gagnant_id)
+      if (result?.error) {
+        if (result.error === 'already_resolved') alert('Les pronostics de ce match ont déjà été résolus.')
+        else alert(`Erreur : ${result.error}`)
+      }
+      load()
+    } catch (e) {
+      alert(`Erreur : ${e.message}`)
+    } finally {
+      setResolvingId(null)
+    }
   }
 
   function set(key, val) { setForm(f => ({ ...f, [key]: val })) }
 
   const statutLabel = v => STATUTS.find(s => s.value === v)?.label || v
+
+  const equipesDuMatch = (m) => [
+    { id: m.equipe1?.id, nom: m.equipe1?.nom },
+    { id: m.equipe2?.id, nom: m.equipe2?.nom },
+  ].filter(e => e.id)
 
   return (
     <div className="admin-section">
@@ -127,6 +157,16 @@ export default function AdminMatchs() {
               </div>
               <div className="admin-row-actions">
                 <span className={`admin-status-badge admin-status-badge--${m.statut}`}>{statutLabel(m.statut)}</span>
+                {m.statut === 'termine' && m.gagnant_id && (
+                  <button
+                    className="admin-icon-btn admin-icon-btn--resolve"
+                    title="Résoudre les pronostics"
+                    disabled={resolvingId === m.id}
+                    onClick={() => handleResoudre(m)}
+                  >
+                    <CheckCircle size={15} />
+                  </button>
+                )}
                 <button className="admin-icon-btn" onClick={() => openEdit(m)}><Pencil size={15} /></button>
                 <button className="admin-icon-btn admin-icon-btn--danger" onClick={() => handleDelete(m.id)}><Trash2 size={15} /></button>
               </div>
@@ -173,6 +213,19 @@ export default function AdminMatchs() {
           <Field label="Score (ex: 2-1)">
             <input type="text" placeholder="—" value={form.score} onChange={e => set('score', e.target.value)} />
           </Field>
+          {form.statut === 'termine' && (
+            <Field label="Équipe gagnante">
+              <select value={form.gagnant_id} onChange={e => set('gagnant_id', e.target.value)}>
+                <option value="">-- Sélectionner --</option>
+                {[
+                  { id: form.equipe1_id, nom: equipes.find(e => String(e.id) === form.equipe1_id)?.nom },
+                  { id: form.equipe2_id, nom: equipes.find(e => String(e.id) === form.equipe2_id)?.nom },
+                ].filter(e => e.id && e.nom).map(e => (
+                  <option key={e.id} value={e.id}>{e.nom}</option>
+                ))}
+              </select>
+            </Field>
+          )}
           {error && <p className="admin-error">{error}</p>}
         </AdminFormModal>
       )}

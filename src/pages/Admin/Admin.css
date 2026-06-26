@@ -244,7 +244,9 @@
 
 .admin-icon-btn:hover { background: #222; color: #999 }
 .admin-icon-btn:active { background: #2a2a2a }
-.admin-icon-btn--danger:hover { color: #ff4655 }
+.admin-icon-btn--danger:hover  { color: #ff4655 }
+.admin-icon-btn--resolve       { color: #4ade80 }
+.admin-icon-btn--resolve:hover { background: rgba(74,222,128,0.1) }
 
 /* Game dot */
 .admin-game-dot {
