@@ -41,9 +41,10 @@ export function useMatches() {
       .order('date_heure', { ascending: true })
       .then(({ data, error }) => {
         if (!error && data) {
-          const sorted = [...data].sort(
-            (a, b) => (STATUT_ORDER[a.statut] ?? 3) - (STATUT_ORDER[b.statut] ?? 3)
-          )
+          const sorted = [...data].sort((a, b) => {
+            if (b.temps_chaud !== a.temps_chaud) return b.temps_chaud ? 1 : -1
+            return (STATUT_ORDER[a.statut] ?? 3) - (STATUT_ORDER[b.statut] ?? 3)
+          })
           setMatches(sorted.map(toCard))
         }
         setLoading(false)

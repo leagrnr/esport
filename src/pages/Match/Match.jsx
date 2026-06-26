@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, X } from 'lucide-react'
+import { Search, X, Flame } from 'lucide-react'
 import MatchCard from './components/MatchCard'
 import TournoiContent from '../Tournoi/components/TournoiContent'
 import ClassementContent from './components/ClassementContent'
@@ -34,6 +34,7 @@ export default function Match() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [gameFilter,   setGameFilter]   = useState('Tous')
   const [statusFilter, setStatusFilter] = useState('tous')
+  const [chaudOnly,    setChaudOnly]    = useState(false)
   const [search,       setSearch]       = useState('')
 
   const { matches, loading }    = useMatches()
@@ -82,7 +83,8 @@ export default function Match() {
     const gameOk   = gameFilter === 'Tous' || (gameFilter === 'LoL' ? m.game === 'lol' : m.game === 'valo')
     const statusOk = statusFilter === 'tous' || m.statut === statusFilter
     const searchOk = !q || m.team1.toLowerCase().includes(q) || m.team2.toLowerCase().includes(q)
-    return gameOk && statusOk && searchOk
+    const chaudOk  = !chaudOnly || m.tempsChaud
+    return gameOk && statusOk && searchOk && chaudOk
   })
 
   const lolMatches  = filtered.filter(m => m.game === 'lol')
@@ -157,6 +159,12 @@ export default function Match() {
                 {f}
               </button>
             ))}
+            <button
+              className={`game-filter chaud-filter${chaudOnly ? ' active' : ''}`}
+              onClick={() => setChaudOnly(v => !v)}
+            >
+              <Flame size={12} /> Temps chaud
+            </button>
           </div>
 
           <div className="status-filters">

@@ -162,6 +162,20 @@
 .game-filter.active { background: #2a2a2a; color: #fcfcfc; border-color: #444; }
 .game-filter:active { opacity: 0.7; }
 
+.chaud-filter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1.4;
+  white-space: nowrap;
+}
+.chaud-filter.active {
+  background: rgba(255, 107, 43, 0.15);
+  color: #ff6b2b;
+  border-color: rgba(255, 107, 43, 0.45);
+}
+
 .match-list {
   display: flex;
   flex-direction: column;
