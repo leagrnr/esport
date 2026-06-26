@@ -64,3 +64,31 @@ export async function resetPixelWar() {
     .in('camp', ['lol', 'valo'])
   if (error) throw error
 }
+
+export async function isTempsChaudEnCours() {
+  const { count, error } = await supabase
+    .from('match')
+    .select('id', { count: 'exact', head: true })
+    .eq('temps_chaud', true)
+    .eq('statut', 'en_cours')
+  if (error) throw error
+  return (count ?? 0) > 0
+}
+
+export async function toggleTempsChaudMatch(matchId, current) {
+  const { error } = await supabase
+    .from('match')
+    .update({ temps_chaud: !current })
+    .eq('id', matchId)
+  if (error) throw error
+}
+
+export async function getTempsChaudMatches() {
+  const { data, error } = await supabase
+    .from('match')
+    .select('id, statut, equipe1:equipe1_id(nom), equipe2:equipe2_id(nom)')
+    .eq('temps_chaud', true)
+    .order('date_heure', { ascending: true })
+  if (error) throw error
+  return data ?? []
+}

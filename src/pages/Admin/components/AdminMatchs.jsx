@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Plus, Pencil, Trash2, CheckCircle } from 'lucide-react'
+import { Plus, Pencil, Trash2, CheckCircle, Flame } from 'lucide-react'
 import { supabase } from '../../../lib/supabase'
-import { resoudreMatch } from '../../../lib/pixelWar'
+import { resoudreMatch, toggleTempsChaudMatch } from '../../../lib/pixelWar'
 import AdminFormModal, { Field } from './AdminFormModal'
 
 const JEUX = [
@@ -69,6 +69,7 @@ export default function AdminMatchs() {
     setError('')
     if (!form.equipe1_id || !form.equipe2_id) { setError('Sélectionne les deux équipes'); return }
     if (form.equipe1_id === form.equipe2_id) { setError('Les deux équipes doivent être différentes'); return }
+    if (form.statut === 'termine' && !form.score) { setError('Renseigne le score final (ex : 2-1)'); return }
     setSaving(true)
     const payload = {
       jeu_id:     Number(form.jeu_id),
@@ -152,6 +153,7 @@ export default function AdminMatchs() {
                     {m.date_heure ? new Date(m.date_heure).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'}
                     {m.score ? ` · ${m.score}` : ''}
                     {m.phase ? ` · ${m.phase}` : ''}
+                    {m.statut === 'termine' && !m.score && <span className="admin-row-warn"> · Score manquant</span>}
                   </span>
                 </div>
               </div>
@@ -167,6 +169,13 @@ export default function AdminMatchs() {
                     <CheckCircle size={15} />
                   </button>
                 )}
+                <button
+                  className={`admin-icon-btn${m.temps_chaud ? ' admin-icon-btn--chaud' : ''}`}
+                  title={m.temps_chaud ? 'Désactiver le temps chaud' : 'Activer le temps chaud'}
+                  onClick={async () => { await toggleTempsChaudMatch(m.id, m.temps_chaud); load() }}
+                >
+                  <Flame size={15} />
+                </button>
                 <button className="admin-icon-btn" onClick={() => openEdit(m)}><Pencil size={15} /></button>
                 <button className="admin-icon-btn admin-icon-btn--danger" onClick={() => handleDelete(m.id)}><Trash2 size={15} /></button>
               </div>

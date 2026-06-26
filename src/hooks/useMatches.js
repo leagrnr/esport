@@ -22,6 +22,8 @@ function toCard(m) {
     locked:     m.statut !== 'a_venir',
     statut:     m.statut,
     score:      m.score,
+    gagnantId:  m.gagnant_id ?? null,
+    tempsChaud: m.temps_chaud ?? false,
   }
 }
 
@@ -34,7 +36,7 @@ export function useMatches() {
   useEffect(() => {
     supabase
       .from('match')
-      .select('id,statut,score,jeu_id,date_heure,equipe1:equipe1_id(id,nom,logo_url),equipe2:equipe2_id(id,nom,logo_url)')
+      .select('id,statut,score,jeu_id,date_heure,temps_chaud,gagnant_id,equipe1:equipe1_id(id,nom,logo_url),equipe2:equipe2_id(id,nom,logo_url)')
       .order('statut', { ascending: true })
       .order('date_heure', { ascending: true })
       .then(({ data, error }) => {
