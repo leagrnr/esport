@@ -5,6 +5,7 @@ import Header from './components/Header/Header'
 import Navbar from './components/Navbar/Navbar'
 import AuthModal from './components/Auth/AuthModal'
 import Home from './pages/Home/Home.tsx'
+import InfosPratiques from './pages/InfosPratiques/InfosPratiques'
 import Programme from './pages/Programme/Programme.tsx'
 import Map from './pages/Map/Map'
 import Match from './pages/Match/Match'
@@ -29,6 +30,7 @@ function App() {
         <Route path="/affrontement/:matchId" element={<Affrontement />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/pixel-war" element={<PixelWar />} />
+        <Route path="/infos-pratiques" element={<InfosPratiques />} />
       </Routes>
       <Navbar />
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
