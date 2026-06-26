@@ -202,7 +202,7 @@ export default function Map() {
                         }}
                     >
                         <ScanCard
-                            stand={stand.type === 'scene' ? "COMPÉTITION" : `Stand ${stand.id}`}
+                            stand={stand.type === 'scene' ? "MATCH" : `Stand ${stand.id}`}
                             title={stand.title}
                             subtitle={stand.subtitle}
                             scanned={stand.type === 'scene' ? true : scanned.includes(stand.id)}
