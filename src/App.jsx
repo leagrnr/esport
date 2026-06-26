@@ -25,7 +25,7 @@ function App() {
       <TempsChaudBanner />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/agenda" element={<Programme />} />
+        <Route path="/programme" element={<Programme />} />
         <Route path="/map" element={<Map />} />
         <Route path="/match" element={<Match />} />
         <Route path="/tournoi" element={<Tournoi />} />
