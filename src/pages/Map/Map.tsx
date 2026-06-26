@@ -21,7 +21,7 @@ export default function Map() {
   };
 
   return (
-    <main className="w-full px-6">
+    <main className="w-full px-6 pb-36">
       <h1
         style={{ fontFamily: "'Archivo Black', sans-serif" }}
         className="text-xl text-white mb-4 text-left"
