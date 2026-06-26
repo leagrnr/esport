@@ -1,0 +1,138 @@
+.afm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  animation: afmFadeIn 0.2s ease;
+}
+
+.afm-sheet {
+  background: #111;
+  border-radius: 20px 20px 0 0;
+  padding: 12px 20px 48px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  animation: afmSlideUp 0.25s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.afm-handle {
+  width: 40px;
+  height: 4px;
+  background: #2a2a2a;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+.afm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.afm-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.afm-close {
+  background: #1e1e1e;
+  border: none;
+  color: #888;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.afm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.afm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.afm-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.afm-field input,
+.afm-field select,
+.afm-field textarea {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 11px 14px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.afm-field input:focus,
+.afm-field select:focus,
+.afm-field textarea:focus {
+  border-color: #ff4655;
+}
+
+.afm-field input::placeholder,
+.afm-field textarea::placeholder {
+  color: #444;
+}
+
+.afm-field select option {
+  background: #1a1a1a;
+}
+
+.afm-submit {
+  background: #ff4655;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: opacity 0.15s;
+}
+
+.afm-submit:disabled {
+  opacity: 0.5;
+}
+
+.afm-submit:active:not(:disabled) {
+  opacity: 0.85;
+}
+
+@keyframes afmFadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+@keyframes afmSlideUp {
+  from { transform: translateY(100%) }
+  to { transform: translateY(0) }
+}
