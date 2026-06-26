@@ -12,11 +12,10 @@ interface AffrontementProps {
 }
 
 export default function Affrontement({ matchId, onBack }: AffrontementProps) {
-    const { id } = useParams<{ id: string }>(); // 🚀 Récupère l'id du programme depuis l'URL de React Router
+    const { matchId: matchIdParam } = useParams<{ matchId: string }>();
     const navigate = useNavigate();
 
-    // Si matchId est fourni en prop, on l'utilise, sinon on prend l'ID de l'URL
-    const currentProgrammeId = matchId || Number(id) || 2;
+    const currentProgrammeId = matchId || Number(matchIdParam);
 
     const [loading, setLoading] = useState<boolean>(true);
     const [eventInfo, setEventInfo] = useState<any | null>(null);
@@ -66,26 +65,6 @@ export default function Affrontement({ matchId, onBack }: AffrontementProps) {
                 }
             } catch (err) {
                 console.error("Erreur de récupération des données :", err);
-                // Fallback Mock de secours si la BDD est vraiment vide
-                setEventInfo({
-                    type: 'Match',
-                    jeu_id: 1,
-                    description: 'Match 4 - Phase de poules',
-                    lieu: 'Scène Valo - Valorant',
-                    date_heure: new Date().toISOString()
-                });
-                setMatchTableInfo({
-                    id: 99,
-                    jeu_id: 1,
-                    date_heure: new Date().toISOString(),
-                    statut: 'EN COURS',
-                    phase: 'Phase de poules',
-                    score: '2 - 1',
-                    equipe1_id: 10,
-                    equipe2_id: 11
-                });
-                setTeam1({ id: 10, nom: "KARMINE CORP", logo_url: null, jeu_id: 1, initial: "KC" });
-                setTeam2({ id: 11, nom: "SOLARY", logo_url: null, jeu_id: 1, initial: "SLY" });
             } finally {
                 setLoading(false);
             }
